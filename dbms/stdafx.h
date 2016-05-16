@@ -1,0 +1,123 @@
+//---------------------------------------------------------------------------
+// stdafx.h
+//
+// ZukiSoft ADO.NET provider for SQLite
+//
+// Copyright (C)2006 Michael Brehm
+// All Rights Reserved
+//---------------------------------------------------------------------------
+
+#ifndef __STDAFX_H_
+#define __STDAFX_H_
+#pragma once
+
+//---------------------------------------------------------------------------
+// CRT / Win32 Declarations
+//---------------------------------------------------------------------------
+
+#define	_WIN32_WINNT		0x0500			// Windows 2000
+#define	_WIN32_IE			0x0500			// IE 5.0 / ShellAPI 5.0
+
+#include <windows.h>		// Include base Win32 declarations
+#include <vcclr.h>			// Include VC CLR extensions
+#include <malloc.h>			// Include CRT memory allocation declarations
+#include <wchar.h>			// Include Unicode string API declarations
+#include <crtdbg.h>			// Include C runtime library debugging helpers
+
+//---------------------------------------------------------------------------
+// Macros
+//---------------------------------------------------------------------------
+
+// BEGIN_NAMESPACE / END_NAMESPACE
+//
+// Used to assist in namespace declarations
+
+#define BEGIN_NAMESPACE(__x) namespace __x {
+#define END_NAMESPACE(__x) }
+
+// CHECK_DISPOSED
+//
+// Used throughout to make object disposed exceptions easier to read and not
+// require hard-coding a class name into the statement.  This will throw the
+// function name, but that's actually better in my opinion
+
+#define CHECK_DISPOSED(__flag) \
+	if(__flag) throw gcnew ObjectDisposedException(gcnew String(__FUNCTION__));
+
+//---------------------------------------------------------------------------
+// Pinned Pointer Types
+
+typedef pin_ptr<unsigned __int8>	PinnedBytePtr;
+typedef pin_ptr<wchar_t>			PinnedCharPtr;
+typedef pin_ptr<const wchar_t>		PinnedStringPtr;
+typedef pin_ptr<void>				PinnedVoidPtr;
+
+//---------------------------------------------------------------------------
+// SQLite
+//---------------------------------------------------------------------------
+
+// NOTE: The xxxxxint.h headers must be included so C++/CLI has some idea what
+// the underlying structures for the "opaque" data types actually look like
+// Also note that I had to change the typedef for sqlite3_stmt in sqlite3.h
+// to look like this:
+//
+// struct Vdbe;
+// typedef struct Vdbe sqlite3_stmt;
+
+#define SQLITE_CORE
+#include <sqliteint.h>			// Include internal header for typedefs
+#include <vdbeint.h>			// Include internal header for typedefs
+#include <sqlite3.h>			// Include public sqlite header
+#include <sqlite3ext.h>			// Include extension API decls
+
+// ENGINE_ISSUE
+//
+// Used to denote something that appears to be a problem with the specific
+// version of SQLite being used.  Will cause a Debug assertion if the engine
+// version changes so I can see if it has been fixed or not.
+//
+// Example:
+//
+// ENGINE_ISSUE(3.3.7, "PRAGMA CASE_SENSITIVE_LIKE does not return a value");
+
+#ifdef _DEBUG
+#define ENGINE_ISSUE(__version, __message) \
+	System::Diagnostics::Debug::Assert(gcnew Version(SQLITE_VERSION) <= gcnew Version(#__version), __message);
+#else
+#define ENGINE_ISSUE(__version, __message)
+#endif	// _DEBUG
+
+//---------------------------------------------------------------------------
+// ZLIB Compression Library
+//---------------------------------------------------------------------------
+
+#include <zlib.h>					// Include main ZLIB declarations
+
+//---------------------------------------------------------------------------
+// Project-Wide #defines
+//---------------------------------------------------------------------------
+
+// ZDB_TRACE_HANDLEREF
+//
+// Monitors the reference counted SQLite handle AddRef() and Release()
+#ifdef _DEBUG
+#define ZDB_TRACE_HANDLEREF
+#endif
+
+// ZDB_TRACE_CONNECTIONHOOKS
+//
+// Monitors the zDBConnectionHook install/uninstalls
+#ifdef _DEBUG
+#define ZDB_TRACE_CONNECTIONHOOKS
+#endif
+
+// ZDB_TRACE_FUNCTIONS
+//
+// Monitors the activity of the zDBAggregate/Function/Collation collections
+#ifdef _DEBUG
+#define ZDB_TRACE_FUNCTIONS
+#endif
+
+//---------------------------------------------------------------------------
+
+#endif	// __STDAFX_H_
