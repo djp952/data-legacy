@@ -45,7 +45,7 @@ StatementHandle::~StatementHandle()
 	try {
 	
 		int nResult = sqlite3_finalize(m_hStatement);	
-		if(nResult != SQLITE_OK) /* TODO (REMOVED): throw gcnew zDBException(m_pDatabase->Handle, nResult); */
+		if(nResult != SQLITE_OK); /* TODO (REMOVED): throw gcnew zDBException(m_pDatabase->Handle, nResult); */
 
 #ifdef ZDB_TRACE_HANDLEREF
 	Debug::WriteLine(String::Format("StatementHandle 0x{0:X}:{1:X} destroyed.", 

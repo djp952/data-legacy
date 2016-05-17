@@ -22,6 +22,3 @@
 *.RTF  diff=astextplain
 
 *.bin binary
-
-# Don't wreck the line endings for unit test input files
-clang.test/input/**/* eol=lf

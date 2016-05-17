@@ -595,6 +595,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="version.ini" />
+    <None Include="dbms.nuspec" />
+    <None Include="dbms.targets" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="zuki.data.dbms.metadata.xsd">

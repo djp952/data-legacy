@@ -1,0 +1,91 @@
+<!--
+tools-llvm.msbuild
+
+Usage:
+
+  - Open Developer Command Prompt for VS2015
+  - Navigate to tools-llvm solution directory
+  - msbuild data.msbuild /t:[TARGET]
+
+Targets:
+
+  - Clean               - Cleans release versions
+  - Build               - Rebuilds release versions
+  - UnitTest            - Executes release version unit test(s)
+  - Package             - Generates nuget package(s) into out\nuget
+
+-->
+<Project DefaultTargets="Package" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <PropertyGroup>
+    <SolutionDir>.\</SolutionDir>
+    <VSTestConsoleExe>&quot;%VS140COMNTOOLS%..\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe&quot;</VSTestConsoleExe>
+    <NuGetExe>&quot;$(SolutionDir)..\external-nuget\nuget.exe&quot;</NuGetExe>
+  </PropertyGroup>
+  
+  <!-- Clean release targets and output directory -->
+  <Target Name="Clean">
+    <MSBuild Projects="data.sln" Properties="Configuration=Release;Platform=Win32" Targets="Clean" ContinueOnError="false"/>
+    <MSBuild Projects="data.sln" Properties="Configuration=Release;Platform=x64" Targets="Clean" ContinueOnError="false"/>
+    <RemoveDir Directories="$(SolutionDir)dbms\tmp"/>
+    <RemoveDir Directories="$(SolutionDir)dbms.test\tmp"/>
+    <RemoveDir Directories="$(SolutionDir)structured\tmp"/>
+    <RemoveDir Directories="$(SolutionDir)structured.test\tmp"/>
+    <RemoveDir Directories="$(SolutionDir)out"/>
+  </Target>
+
+  <!-- Build release targets -->
+  <Target Name="Build" DependsOnTargets="Clean">
+    <MSBuild Projects="data.sln" Properties="Configuration=Release;Platform=Win32" Targets="Rebuild" ContinueOnError="false"/>
+    <MSBuild Projects="data.sln" Properties="Configuration=Release;Platform=x64" Targets="Rebuild" ContinueOnError="false"/>
+  </Target>
+
+  <!-- Build release targets and execute unit tests -->
+  <Target Name="UnitTest" DependsOnTargets="Build">
+    <Exec Command="$(VSTestConsoleExe) /Settings:$(SolutionDir)default.runsettings /Platform:x86 /inIsolation $(SolutionDir)out\Win32\Release\zuki.data.dbms.test.dll" ContinueOnError="false"/>
+    <Exec Command="$(VSTestConsoleExe) /Settings:$(SolutionDir)default.runsettings /Platform:x64 /inIsolation $(SolutionDir)out\x64\Release\zuki.data.dbms.test.dll" ContinueOnError="false"/>
+    <Exec Command="$(VSTestConsoleExe) /Settings:$(SolutionDir)default.runsettings /Platform:x86 /inIsolation $(SolutionDir)out\Win32\Release\zuki.data.structured.test.dll" ContinueOnError="false"/>
+    <Exec Command="$(VSTestConsoleExe) /Settings:$(SolutionDir)default.runsettings /Platform:x64 /inIsolation $(SolutionDir)out\x64\Release\zuki.data.structured.test.dll" ContinueOnError="false"/>
+  </Target>
+
+  <!-- Generate nuget packages -->
+  <Target Name="Package" DependsOnTargets="Build">
+
+    <PropertyGroup>
+      <PackageVersionDbms>$([System.IO.File]::ReadAllText($(SolutionDir)dbms\tmp\version.txt))</PackageVersionDbms>
+      <PackageDirDbms>$(SolutionDir)out\nuget\dbms\</PackageDirDbms>
+      <PackageLibDirDbms>$(PackageDirDbms)lib\net45\</PackageLibDirDbms>
+      <PackageBuildDirDbms>$(PackageDirDbms)build\net45\</PackageBuildDirDbms>
+      <PackageVersionStructured>$([System.IO.File]::ReadAllText($(SolutionDir)structured\tmp\version.txt))</PackageVersionStructured>
+      <PackageDirStructured>$(SolutionDir)out\nuget\structured\</PackageDirStructured>
+      <PackageLibDirStructured>$(PackageDirStructured)lib\net45\</PackageLibDirStructured>
+      <PackageBuildDirStructured>$(PackageDirStructured)build\net45\</PackageBuildDirStructured>
+    </PropertyGroup>
+
+    <RemoveDir Directories="$(PackageDirDbms)" ContinueOnError="false"/>
+    <RemoveDir Directories="$(PackageDirStructured)" ContinueOnError="false"/>
+
+    <MakeDir Directories="$(PackageDirDbms)" ContinueOnError="false"/>
+    <MakeDir Directories="$(PackageLibDirDbms)" ContinueOnError="false"/>
+    <MakeDir Directories="$(PackageBuildDirDbms)" ContinueOnError="false"/>
+    <MakeDir Directories="$(PackageDirStructured)" ContinueOnError="false"/>
+    <MakeDir Directories="$(PackageLibDirStructured)" ContinueOnError="false"/>
+    <MakeDir Directories="$(PackageBuildDirStructured)" ContinueOnError="false"/>
+
+    <Copy SourceFiles="$(SolutionDir)dbms\dbms.nuspec" DestinationFiles="$(PackageDirDbms)zuki.data.dbms.nuspec" ContinueOnError="false"/>
+    <Copy SourceFiles="$(SolutionDir)out\Win32\Release\zuki.data.dbms.dll" DestinationFolder="$(PackageLibDirDbms)" ContinueOnError="false"/>
+    <Copy SourceFiles="$(SolutionDir)out\Win32\Release\zuki.data.dbms.dll" DestinationFolder="$(PackageBuildDirDbms)x86\" ContinueOnError="false"/>
+    <Copy SourceFiles="$(SolutionDir)out\x64\Release\zuki.data.dbms.dll" DestinationFolder="$(PackageBuildDirDbms)x64\" ContinueOnError="false"/>
+    <Copy SourceFiles="$(SolutionDir)dbms\dbms.targets" DestinationFiles="$(PackageBuildDirDbms)zuki.data.dbms.targets" ContinueOnError="false"/>
+    <Exec Command="$(NuGetExe) pack $(PackageDirDbms)zuki.data.dbms.nuspec -OutputDirectory $(PackageDirDbms) -Version $(PackageVersionDbms)" ContinueOnError="false" />
+
+    <Copy SourceFiles="$(SolutionDir)structured\structured.nuspec" DestinationFiles="$(PackageDirStructured)zuki.data.structured.nuspec" ContinueOnError="false"/>
+    <Copy SourceFiles="$(SolutionDir)out\Win32\Release\zuki.data.structured.dll" DestinationFolder="$(PackageLibDirStructured)" ContinueOnError="false"/>
+    <Copy SourceFiles="$(SolutionDir)out\Win32\Release\zuki.data.structured.dll" DestinationFolder="$(PackageBuildDirStructured)x86\" ContinueOnError="false"/>
+    <Copy SourceFiles="$(SolutionDir)out\x64\Release\zuki.data.structured.dll" DestinationFolder="$(PackageBuildDirStructured)x64\" ContinueOnError="false"/>
+    <Copy SourceFiles="$(SolutionDir)structured\structured.targets" DestinationFiles="$(PackageBuildDirStructured)zuki.data.structured.targets" ContinueOnError="false"/>
+    <Exec Command="$(NuGetExe) pack $(PackageDirStructured)zuki.data.structured.nuspec -OutputDirectory $(PackageDirStructured) -Version $(PackageVersionStructured)" ContinueOnError="false" />
+
+  </Target>
+
+</Project>

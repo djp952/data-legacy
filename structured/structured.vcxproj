@@ -27,6 +27,7 @@
     <SccProvider>SAK</SccProvider>
     <Keyword>ManagedCProj</Keyword>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>structured</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -253,6 +254,8 @@
     <ClInclude Include="StructuredStorage.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="structured.nuspec" />
+    <None Include="structured.targets" />
     <None Include="version.ini" />
   </ItemGroup>
   <ItemGroup>

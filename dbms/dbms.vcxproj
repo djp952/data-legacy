@@ -27,6 +27,7 @@
     <SccProvider>SAK</SccProvider>
     <Keyword>ManagedCProj</Keyword>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>dbms</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -1279,6 +1280,8 @@
     <CustomBuild Include="zuki.data.dbms.metadata.xsd" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="dbms.nuspec" />
+    <None Include="dbms.targets" />
     <None Include="version.ini" />
   </ItemGroup>
   <ItemGroup>

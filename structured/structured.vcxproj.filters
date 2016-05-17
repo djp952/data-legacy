@@ -181,6 +181,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="version.ini" />
+    <None Include="structured.nuspec" />
+    <None Include="structured.targets" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="tmp\version.rc">
